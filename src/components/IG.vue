@@ -1,12 +1,22 @@
 <template>
   <div id="IG">
-    <form action="/">
-  <input type="search">
-  <i class="fa fa-search"></i>
-</form>
+    <form class="searchForm" @submit="submitSearch">
+      <input type="search" class="search" v-model="searchQuery">
+      <i class="fa fa-search"></i>
+    </form>
+    <div v-if="a">
+      <h1>{{"#"+name}}</h1>
+      <h1>{{count+ " โพสต์"}}</h1>
+      <div class="pichead" v-for="b in profile" :key="b.id">  
+        <img :src="b.profile_pic_url">
+      </div>
+    </div>
     <ul class="fixpic">
       <div v-for="c in ig" :key="c.id">
         <img class="pic" :src="c.node.display_url">
+        <div class="fa">
+          <i class="far fa-heart"></i>
+        </div>
       </div>
     </ul>
   </div>
@@ -18,18 +28,33 @@ export default {
   name: "IG",
   data() {
     return {
-      ig: []
+      ig: [],
+      searchQuery: "",
+      a: false,
+      profile:[]
     };
   },
   mounted() {
     this.load();
   },
   methods: {
+    submitSearch(submit) {
+      submit.preventDefault();
+      this.load();
+    },
     load() {
       axios
-        .get("https://www.instagram.com/explore/tags/animal/?__a=1", null)
+        .get(
+          "https://www.instagram.com/explore/tags/" +
+            this.searchQuery +
+            "/?__a=1"
+        )
         .then(result => {
+          this.profile = result.data.graphql;
+          this.name = result.data.graphql.hashtag.name;
+          this.count = result.data.graphql.hashtag.edge_hashtag_to_media.count;
           this.ig = result.data.graphql.hashtag.edge_hashtag_to_media.edges;
+          this.a = true;
         })
         .catch(err => {
           console.log(err);
@@ -45,10 +70,24 @@ export default {
   table {
     width: 100%;
   }
+  .pichead {
+    position: absolute;
+    width: 152px;
+    height: 152px;
+    margin-top: -150px;
+    margin-left: 350px;
+    
+    
+    img{
+      border-radius: 100px;
+     -webkit-tap-highlight-color: transparent;
+    }
+  }
   .fixpic {
     margin: 0;
     padding: 0;
     width: 100%;
+    position: relative;
   }
   .pic {
     width: 31.1%;
@@ -59,18 +98,22 @@ export default {
     display: grid;
     grid: 150px / auto auto auto;
     grid-gap: 10px;
-    opacity: 1 ;
-    -webkit-transition: 0.1s ease-in-out ;
-    transition: 0.1s ease-in-out ;
+    opacity: 1;
+    -webkit-transition: 0.1s ease-in-out;
+    transition: 0.1s ease-in-out;
   }
   .pic:hover {
-    opacity: 0.5 ;
+    opacity: 0.5;
   }
-  form{
+
+  .searchForm {
+    margin-bottom: 2.6rem;
+  }
+  form {
     position: relative;
     top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     transition: all 1s;
     width: 50px;
     height: 50px;
@@ -79,13 +122,13 @@ export default {
     border-radius: 25px;
     border: 4px solid black;
     padding: 5px;
-}
+  }
 
-input{
+  input {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;;
+    width: 100%;
     height: 42.5px;
     line-height: 30px;
     outline: 0;
@@ -94,9 +137,9 @@ input{
     font-size: 1em;
     border-radius: 20px;
     padding: 0 20px;
-}
+  }
 
-.fa{
+  .fa {
     box-sizing: border-box;
     padding: 10px;
     width: 42.5px;
@@ -109,20 +152,20 @@ input{
     text-align: center;
     font-size: 1.2em;
     transition: all 1s;
-}
+  }
 
-form:hover{
+  form:hover {
     width: 200px;
     cursor: pointer;
-}
+  }
 
-form:hover input{
+  form:hover input {
     display: block;
-}
+  }
 
-form:hover .fa{
+  form:hover .fa {
     background: white;
     color: black;
-}
+  }
 }
 </style>
